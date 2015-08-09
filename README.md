@@ -1,6 +1,8 @@
 #Requirement
+
 ##PY 3.+
 * [docopt](https://github.com/docopt/docopt) v0.6.2 is adopt for parsing arguments.
+
 ##PY 2.+
 * [futures]https://pypi.python.org/pypi/futures/ v3.0.3 is adopt for concurrence and compatibility.
 * [docopt](https://github.com/docopt/docopt) v0.6.2 is adopt for parsing arguments.

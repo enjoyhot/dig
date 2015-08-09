@@ -1,0 +1,6 @@
+
+[Dict_DATA_IO]
+default_from_lang: en
+default_to_lang: zh-CN
+audio_playback_command: mpg123
+default_num: 0

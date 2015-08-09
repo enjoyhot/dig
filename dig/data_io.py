@@ -1,8 +1,13 @@
+#! /usr/bin/env python
+#coding=utf-8
+
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import os
+import os,sys
 import gzip
+import xml.etree.ElementTree as ET
+_ROOT = 'records'
 
 try:
     import ConfigParser as configparser
@@ -11,23 +16,23 @@ except:
 
 # __DATA_DIR hard coded the directory contains records and configuation
 # file.
-_DATA_DIR = os.path.expanduser('~/.mgd')
-
+_DATA_DIR = os.getcwd()
 _CONFIG_FILENAME = 'config'
-_CACHE_FILENAME = 'cache.xml'
-_RECORD_FILENAME = 'record.xml.gz'
+_RECORD_FILENAME = 'record.xml'
 
 # fields in configuration file.
-_SECTION_NAME = 'MyGoogleDict'
+_SECTION_NAME = 'Dict_DATA_IO'
 _FROM_LANG = 'default_from_lang'
 _TO_LANG = 'default_to_lang'
 _AUDIO_PLAYBACK_COMMAND = 'audio_playback_command'
+_RECORD_NUM = 'default_num'
 
 _RAW_CONTENT = """
 [{}]
 {}: en
 {}: zh-CN
 {}: {}
+{}: 0
 """
 
 
@@ -40,6 +45,7 @@ def _generate_default_config_content():
         _FROM_LANG,
         _TO_LANG,
         _AUDIO_PLAYBACK_COMMAND, audio_player,
+        _RECORD_NUM,
     )
     return content
 
@@ -49,15 +55,22 @@ _DEFAULT_CONFIG_CONTENT = _generate_default_config_content()
 class RecordIO(object):
 
     def __init__(self):
-        self._cache_path = os.path.join(
-            _DATA_DIR,
-            _CACHE_FILENAME,
-        )
         self._record_path = os.path.join(
             _DATA_DIR,
             _RECORD_FILENAME,
         )
-
+        if os.path.exists(self._record_path) == False:
+            xml_file = self.CreateXml()
+            xml_file.write(self._record_path)
+            
+    def CreateXml(self):
+        xml_file = ET.ElementTree()
+        purOrder = ET.Element(_ROOT)
+        xml_file._setroot(purOrder)
+        return xml_file
+        
+        
+    
     def _read_file(self, path, gzip_enable=False):
         """
         Parameters:
@@ -69,11 +82,14 @@ class RecordIO(object):
         """
 
         openfile = gzip.open if gzip_enable else open
-        with openfile(path, 'rb') as f:
+        with openfile(path, 'rb+') as f:
             content = f.read()
-        return content
+        import xml.etree.ElementTree as ET 
+        self.tree = ET.parse(path)     
+        root = self.tree.getroot()
+        return root
 
-    def _write_file(self, content, path, gzip_enable=False):
+    def _write_file(self, path, gzip_enable=False):
         """
         Parameters:
             content: bytes of content to be written to file.
@@ -81,58 +97,24 @@ class RecordIO(object):
         Return:
             None.
         """
-
+        self.tree.write(path)
+        '''
         openfile = gzip.open if gzip_enable else open
-        with openfile(path, 'wb') as f:
+        with openfile(path, 'wb+') as f:
             f.write(content)
-
-    ############
-    # Cache IO #
-    ############
-    def _read_cache(self):
-        return self._read_file(self._cache_path)
-
-    def _write_cache(self, content):
-        self._write_file(content, self._cache_path)
-
-    cache = property(_read_cache, _write_cache)
-
+        '''
+        
     #############
     # Record IO #
     #############
-    def _read_record(self):
-        return self._read_file(self._record_path,
-                               gzip_enable=True)
+
+    def _read_record(self):        
+        return self._read_file(self._record_path)
 
     def _write_record(self, content):
-        self._write_file(content, self._record_path,
-                         gzip_enable=True)
+        self._write_file(self._record_path)
 
     record = property(_read_record, _write_record)
-
-    ##############
-    # Merge Flag #
-    ##############
-    def _judge_merge(self):
-        """
-        Return:
-            True for merging file.
-        """
-
-        # hardcode the threshold size of cache .
-        MAX_SIZE = 65535
-        try:
-            file_size = os.path.getsize(self._cache_path)
-        except:
-            # file not exist, force to merge.
-            return True
-
-        if file_size > MAX_SIZE:
-            return True
-        else:
-            return False
-
-    merge_flag = property(_judge_merge)
 
 
 class ConfigIO(object):
@@ -170,19 +152,12 @@ class ConfigIO(object):
                                                _FROM_LANG),
             default_to_lang=self._config.get(_SECTION_NAME,
                                              _TO_LANG),
+            default_num=self._config.get(_SECTION_NAME,
+                                            _RECORD_NUM),                                            
         )
-
-    def get_playback_command(self):
-        return self._config.get(_SECTION_NAME,
-                                _AUDIO_PLAYBACK_COMMAND)
-
 
 def set_up_doc(doc):
     config_io = ConfigIO()
     return config_io.set_up_doc(doc)
 
 
-def get_playback_command():
-    config_io = ConfigIO()
-    raw_command = config_io.get_playback_command()
-    return raw_command.split(' ')

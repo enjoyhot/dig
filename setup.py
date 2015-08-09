@@ -18,7 +18,8 @@ setup(
     description='command-line front end of google translation serve.',
     long_description=open('README.rst').read(),
 
-    # install_requires=['docopt==0.6.1', 'google_translate_api>=0.3'],
+    
+    install_requires=['docopt==0.6.2','futures>=3.0.3'],
     packages=['dig'],
 
     entry_points={

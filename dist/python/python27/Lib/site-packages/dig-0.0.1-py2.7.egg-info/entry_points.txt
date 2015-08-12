@@ -1,0 +1,3 @@
+[console_scripts]
+dig = dig.cmdline:main
+

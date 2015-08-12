@@ -6,15 +6,17 @@ from __future__ import print_function
 
 # standrad packages
 import unicodedata
-from concurrent.futures import ThreadPoolExecutor
-# third-part dependencies
 import requests
-import urllib2
-import urllib
 import re
+import os
+from subprocess import call
+# third-part dependencies
+from concurrent.futures import ThreadPoolExecutor
+
+
 import sys
 reload(sys)
-sys.setdefaultencoding( 'gb18030' )
+sys.setdefaultencoding('gb18030')
 
 
 _UTF8 = 'UTF-8'
@@ -43,15 +45,15 @@ SRC = 'src'
 class _BaseRequestMinix(object):    
     """
     Description:
-        POST请求和处理
-        监听线程是否完成
+        request and handdle
+        monitor thread until works finish.
     """
 
     def _request_with_reconnect(self, callback):        
         reconnect_times = _RECONNECT_TIMES        
         while True:            
             try:
-                # POST request                             
+                # request using callback function
                 response = callback()                
                 break
             except Exception as e:
@@ -345,19 +347,6 @@ class TranslateService(_TranslateMinix, _SplitTextMinix):
         return self._translate(src_lang, tgt_lang, src_text)
 
 
-    def detect(self, src_text):
-        """
-        Description:
-            Accept both UTF-8 or decoded unicode strings. Detect the language
-            of given source text.
-        Return Value:
-            Dictionary contains language information. Type of Data in the
-            dictionary is Unicode(String in Py3).
-        """
-
-        json_result = self._translate('', '', src_text)
-        return self.get_src_language_from_json(json_result)
-
     @classmethod
     def get_senteces_from_json(cls, json_data):
         """
@@ -391,84 +380,72 @@ class TranslateService(_TranslateMinix, _SplitTextMinix):
 
 class _TTSRequestMinix(_BaseRequestMinix):
 
-    def _basic_request(self, tgt_lang, src_text, chunk_num, chunk_index):
+    def _basic_request(self, from_lang, text):
         """
         Description:
             GET request for TTS of google translation service.
         Return Value:
-            MPEG Binary data.
+            audio/mpeg response.
         """
 
         params = {
-            'ie': _UTF8,
-            'q': src_text,
-            'tl': tgt_lang,
-            'total': chunk_num,
-            'idx': chunk_index,
-            'textlen': len(src_text),
-        }
+            'ie': 'UTF-8',
+            'q' : text,
+            'tl': from_lang,
+            'total': '1',
+            'idx': '0',
+            'textlen': str(len(text)),
+            'tk': '903567',
+            'client': 't',
+            'prev': 'input',
+            'ttsspeed': '0.24',
+        }                  
 
         def callback():
             # GET request
             response = requests.get(
-                _GOOGLE_TTS_URL,
-                params=params,
+                _GOOGLE_TTS_URL,    
+                params=params, 
             )
             return response
 
         response = self._request_with_reconnect(callback)
-        return response.content
+        
+        # save audio/mpeg to .mp3
+        with open("text2speech.mp3", "wb+") as code:
+             code.write(response.content)
+        mpg123exeDir = os.getcwd() + os.sep + "dig" +  os.sep + "mpg123.exe"
+        call([mpg123exeDir,"text2speech.mp3"])
+        os.remove("text2speech.mp3")
 
-    def _request(self, tgt_lang, src_texts):
+
+    def _request(self, from_lang, text):
         """
         Description:
-            Similar to _TranslateMinix._request. src_texts should be a list
-            contains texts to generate audio. Concurrent request is applied.
-        Return Value:
-            MPEG Binary data.
+            Similar to _TranslateMinix._request. Text should be in from_lang.
         """
 
-        executor = ThreadPoolExecutor(max_workers=len(src_texts))
-        threads = []
-        for index, src_text in enumerate(src_texts):
-            future = executor.submit(
-                self._basic_request,
-                tgt_lang,
-                src_text,
-                len(src_texts),
-                index,
-            )
-            threads.append(future)
-
-        # check whether all threads finished or not.
-        self._check_threads(threads)
-
-        # concatenate binary data.
-        get_result = lambda x: x.result()
-        return b''.join(map(get_result, threads))
-
+        self._basic_request(from_lang, text)
 
 class TTSService(_TTSRequestMinix, _SplitTextMinix):
 
-    def __init__(self):
-        pass
 
-    def get_mpeg_binary(self, tgt_lang, src_text):
+    def speak_details(self, from_lang, text):
         """
         Description:
-            Accept both UTF-8 or decoded unicode strings. Get MPEG binary data
-            of given source text, as the result of Google
-            TTS service.
-        Return Value:
-            MPEG Binary data.
+            request the Text To Speech api
         """
-        src_texts = self._split_text(src_text, _MAX_TTS_LENGTH)
-        print(src_text)
-        return self._request(tgt_lang, src_texts)
+        self._request(from_lang, text)
+
+
 
 if __name__ == '__main__':
         
-    #print translator.trans_details('en', 'zh-CN', 'this is')
+    """
+    Description
+        only development test 
+        users could just ignore
+    """
     import platform
     audio_player = 'afplay' if platform.system() == 'Darwin' else 'mpg123'
     

@@ -36,3 +36,7 @@ setup(
         'License :: OSI Approved :: MIT License',
     ],
 )
+print("======================")
+print("######################")
+print("# dig version: " + version + " #")
+print("######################")

@@ -6,7 +6,7 @@ dig is a simple command-line program which Communicates with translation server 
 * [docopt](https://github.com/docopt/docopt) v0.6.2 is adopt for parsing arguments.
 
 ##python 2.7
-* [futures](https://pypi.python.org/pypi/futures/ v3.0.3 is adopt for concurrence and compatibility.
+* [futures](https://pypi.python.org/pypi/futures/) v3.0.3 is adopt for concurrence and compatibility.
 * [docopt](https://github.com/docopt/docopt) v0.6.2 is adopt for parsing arguments.
 ```python
 $ python setup.py install
@@ -28,8 +28,8 @@ $ python setup.py install
 # Important points
 
 1.Now only support google translation.
-2.Make sure your computer can connect to google.com.
-3.Text to speech function is effective only in win7/xp platform. 
+1.Make sure your computer can connect to google.com.
+1.Text to speech function is effective only in win7/xp platform. 
 
 # Uncompleted problems
 

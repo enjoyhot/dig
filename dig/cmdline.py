@@ -5,6 +5,8 @@
 Usage: dig [-f <from_lang>] [-t <to_lang>]
            [-v|--reverse] [-s|--speak] <data>...
        dig [-n <num>] -r|--record
+       dig -c|--configure <tool>
+       dig -h|--help 
 
 Options:
     -f <from_lang>  input language [default: {default_from_lang}]
@@ -13,18 +15,24 @@ Options:
     -s --speak      speak out the result
     -n <num>        display n records [default: {default_num}]
     -r --record     display search record
+    -c --configure  set current translation tool [google,youdao]
+    -h --help       Ask for detailed help
+    
+Additional information:
+    Now you has type 'dig -h|--help'. 
+    You can get more in https://github.com/enjoyhot/dig/.
 """
 
-
-#from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import print_function
 from os.path import dirname,join
 from docopt import docopt
 from dig.data_io import set_up_doc
 from dig.translate import Translator,Speaker
 from dig.record import Record
-
-
-__version__ = '0.0.1'
+import os
+from translate_api import Global_settings
+from settings import *
 
 def _assemble_data(raw_data):
     if len(raw_data) == 1:
@@ -55,15 +63,26 @@ def _extract(arguments,has_data):
 
 
 def main():
+        
+    # save setting.TOOL to file
+    if not os.path.exists(TOOL_FILENAME):
+        tool_save = "{'TOOL':'" + CURRENT_TOOL + "'}"
+        with open(TOOL_FILENAME, "wb+") as f:
+            f.write(tool_save)    
+    with open("dig/VERSION", "rb+") as f:
+        VERSION = f.read()  
     
     arguments = docopt(
         set_up_doc(__doc__),
-        version=__version__
+        version = VERSION
     )
 
     record = Record()
     
     if arguments['<data>']:
+        
+        tool = Global_settings()
+        
         # extract 
         from_lang, to_lang, data = _extract(arguments,True)      
         
@@ -78,8 +97,12 @@ def main():
 
         # Text to Speech，be making sure data belongs to from_lang
         if arguments['--speak']:
-            speaker = Speaker(from_lang, data)
-            speaker.speak()
+
+            if (tool == "youdao")and(from_lang == "zh_CN"):
+                print(tool + r" service doesn't support text2speech for " + from_lang)
+            else:                
+                speaker = Speaker(from_lang, data)
+                speaker.speak()
                     
         
     elif arguments['--record']:
@@ -88,6 +111,32 @@ def main():
         '''
         record_num = _extract(arguments,False)    
         record.display(record_num)
+        
+    elif arguments['--configure']:
+        
+        with open(TOOL_FILENAME, 'rb+') as f:
+            content = f.read()
+        content = eval(content)
+        tool = content["TOOL"]
+        print("")
+        print("----- Your current traslation tool: " + str(tool) + " -----")
+        if arguments['<tool>'] not in OPTIONAL_TOOLS:  
+            print("") 
+            wrong_input = arguments['<tool>']        
+            print("[WARNING] Wrong setting for " + str(wrong_input) + \
+            "! Please choose one from " + str(OPTIONAL_TOOLS))
+        else:
+            """ 
+            set current translation tool
+            """             
+            # save setting.TOOL to file
+            tool_save = "{'TOOL':'" + arguments['<tool>'] + "'}"
+            with open(TOOL_FILENAME, "wb+") as f:
+                f.write(tool_save)            
+                           
+            print("")
+            print("Change to " + arguments['<tool>'] + " successfully!")
+            
     else:
         raise Exception('No Implemented Yet.')
     

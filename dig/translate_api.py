@@ -6,52 +6,46 @@ from __future__ import print_function
 
 # standrad packages
 import unicodedata
-from concurrent.futures import ThreadPoolExecutor
-# third-part dependencies
 import requests
-import urllib2
-import urllib
 import re
+import os
+from subprocess import call
+import json
+# third-part dependencies
+from concurrent.futures import ThreadPoolExecutor
+from share import STR_RESULT,LOAD_TRANS_DATA,LOAD_TTS_DATA
+from settings import *
+
 import sys
 reload(sys)
-sys.setdefaultencoding( 'gb18030' )
+sys.setdefaultencoding('gb18030')
 
 
-_UTF8 = 'UTF-8'
 _RECONNECT_TIMES = 5
 _TIMEOUT = 30
 
-_GOOGLE_TRANS_URL = 'http://translate.google.com/translate_a/single'
-_MAX_TRANS_LENGTH = 2000
+global _TRANS_URL
+_MAX_TRANS_LENGTH = 20
 
-_GOOGLE_TTS_URL = 'http://translate.google.cn/translate_tts'
+global  _TTS_URL
 _MAX_TTS_LENGTH = 99
 
-
-# keys in json data.
-SENTENCES = 'sentences'
-TRANS = 'trans'
-
-DICT = 'dict'
-POS = 'pos'
-TERMS = 'terms'
-
-SRC = 'src'
-
+global  _TRANS_PARAMS
+global  _TTS_PARAMS
 
 
 class _BaseRequestMinix(object):    
     """
     Description:
-        POST请求和处理
-        监听线程是否完成
+        request and handdle
+        monitor thread until works finish.
     """
 
     def _request_with_reconnect(self, callback):        
         reconnect_times = _RECONNECT_TIMES        
         while True:            
             try:
-                # POST request                             
+                # request using callback function
                 response = callback()                
                 break
             except Exception as e:
@@ -153,132 +147,58 @@ class _SplitTextMinix(object):
 
 class _TranslateMinix(_BaseRequestMinix):    
     """
-    Low-level method for HTTP communication with google translation service.
-    包装数据和解析接收到数据
+    Description:
+        Low-level method for HTTP communication with google translation service.
+        wrap and resolve data received.
     """
 
+    global _TRANS_URL,_TRANS_PARAMS
+    
     def _basic_request(self, src_lang, tgt_lang, src_text):        
         """
         Description:
             POST request to translate.google.com. If connection failed,
             _basic_request would try to reconnect the server.
         Return Value:
-            Dictionary contains unicode JSON data.
-        """
+            string data.
+        """          
 
+        request_data = LOAD_TRANS_DATA(src_lang, tgt_lang, src_text)
 
-        params = {
-            'client': 't',
-            'sl': src_lang,
-            'tl': tgt_lang,
-            'h1': tgt_lang,
-            'dt': 'bd',
-            'dt': 'ex',
-            'dt': 'ld',
-            'dt': 'md',
-            'dt': 'qca',
-            'dt': 'rw',
-            'dt': 'rm',
-            'dt': 'ss',
-            'dt': 't',
-            'dt': 'at',
-
-            'ie': _UTF8,
-            'oe': _UTF8,     
-            'srcrom': '0',
-            'ssel': '0',
-            'tsel': '0',
-            'kc': '1',
-            'tk': '522913|331595',
-        }
-        
-                
         def callback():
             # POST request
             headers = {'content-type': 'application/json'}
             response = requests.post(
-                _GOOGLE_TRANS_URL,
-                data={'q': src_text},
-                params=params,                
+                _TRANS_URL,
+                data=request_data,
+                params=_TRANS_PARAMS,                
             ) 
-            # data={'q': src_text,params}
-            # response = post(_GOOGLE_TRANS_URL, params)                     
+                   
             return response
         
-        response = self._request_with_reconnect(callback)              
-        return response.text
-    
-    def _str2result(self,hello):
-           
-        hello = str(hello)
-        k=re.compile(r',,,,|,,,|,,')     
-        hello = k.sub(r',None,',hello)      
-        k=re.compile(r'false|true')     
-        hello = k.sub(r'None',hello)   
-        k=re.compile(r'\[,') 
-        hello = k.sub(r'[None,',hello)  
-        k=re.compile(r',\]') 
-        hello = k.sub(r',None]',hello)        
-        a = list(eval(hello)) 
-       
-        # a = list(eval(b[0]))  
-        if(len(a) < 5):
-            return str("have no result.")
-        slipSen = a[4]
-        if(len(slipSen[0]) < 3):
-            return str("have no result.")            
-        total = []
-        for word2 in slipSen:            
-            i = 0    
-            result = []                    
-            for word1 in word2[2]:  
-                #print str(word1[i][0])        
-                result.append(str(word2[2][i][0]))
-                i=i+1 
-                #print (str(i) + str("34"))
-            total.append(result)
-        # if it is just a simple word or two.
-        sentences = ""
-        if len(total) != 1:            
-            for words in total:
-                sentences = sentences + words[0]
-        else:
-            for word in total[0]:
-                sentences = sentences + word + " "
-        return sentences
+        response = self._request_with_reconnect(callback) 
+        return response.text    
     
 
     def _merge_text(self, text):
         """
         Description:
-            Receive JSON dictionaries returned by _basic_request. With the
-            observation of JSON response of translate.google.com, we can see
-            that:
-                1. For single word translation, JSON dictionary contains more
-                information compared to sentence translation.
-                2. For multi-word sentence translation, there are three keys in
-                JSON dictionary, 'sentences', 'server_time' and 'src'. The JSON
-                dictionary returned by single word translation, on the other
-                hand, has an extra key 'dict' whose value related to details
-                of the meanings.
-            Therefore, for jsons has the length greater than one, _merge_json
-            would just merge the value of 'sentences' key in jsons. For the
-            accuracy of language detectation, values of 'src' key in jsons
-            would be analysed and stored as a dictionary, with language code as
-            its key and the proportion as its value.
+            Receive requests data for map/json... format data, returned by 
+            _basic_request. With the observation of different result from 
+            different translation tool, using the function STR_RESULT can
+            help to create a string object.
         Return Value:
-            Dictionary contains unicode JSON data.
+            String object.
         """
-        
-
-        if len(text) == 1:   
-            return self._str2result(text[0])
+                
+        if len(text) == 1: 
+            return STR_RESULT(text[0],True)
 
         merged_text = ""
     
         
         for textItem in text:
-            merged_text = merged_text + self._str2result(textItem)
+            merged_text = merged_text + STR_RESULT(textItem,False)
 
         return merged_text
 
@@ -294,7 +214,7 @@ class _TranslateMinix(_BaseRequestMinix):
             multiple times, concurrent.futures package is adopt for the usage
             of threads concurrency.
         Return Value:
-            Dictionary contains unicode JSON data.
+            String object.
         """                 
         executor = ThreadPoolExecutor(max_workers=len(src_texts))
         threads = []        
@@ -345,130 +265,88 @@ class TranslateService(_TranslateMinix, _SplitTextMinix):
         return self._translate(src_lang, tgt_lang, src_text)
 
 
-    def detect(self, src_text):
-        """
-        Description:
-            Accept both UTF-8 or decoded unicode strings. Detect the language
-            of given source text.
-        Return Value:
-            Dictionary contains language information. Type of Data in the
-            dictionary is Unicode(String in Py3).
-        """
-
-        json_result = self._translate('', '', src_text)
-        return self.get_src_language_from_json(json_result)
-
-    @classmethod
-    def get_senteces_from_json(cls, json_data):
-        """
-        Return:
-            Unicode strings.
-        """
-
-        sentences = map(
-            lambda x: x[TRANS],
-            json_data[SENTENCES],
-        )
-        return ''.join(sentences)
-
-    @classmethod
-    def has_pos_terms_pairs(cls, json_data):
-        return DICT in json_data
-
-    @classmethod
-    def get_pos_terms_pairs_from_json(cls, json_data):
-        assert DICT in json_data,\
-            'pos-temrs pair not exist, try cls.has_pos_terms_pairs'
-        for entity in json_data.get(DICT):
-            pos = entity[POS] or 'error_pos'
-            vals = entity[TERMS][:]
-            yield pos, vals
-
-    @classmethod
-    def get_src_language_from_json(cls, json_data):
-        return json_data[SRC]
-
-
 class _TTSRequestMinix(_BaseRequestMinix):
+    
+    def _basic_request(self, from_lang, text):
 
-    def _basic_request(self, tgt_lang, src_text, chunk_num, chunk_index):
         """
         Description:
-            GET request for TTS of google translation service.
-        Return Value:
-            MPEG Binary data.
+            GET request for TTS of google translation service.If connection 
+            failed, _basic_request would try to reconnect the server.
+            handle audio/mpeg response.
         """
-
-        params = {
-            'ie': _UTF8,
-            'q': src_text,
-            'tl': tgt_lang,
-            'total': chunk_num,
-            'idx': chunk_index,
-            'textlen': len(src_text),
-        }
-
+        global _TTS_URL,_TTS_PARAMS
+        # e.g. word=hello&keyfrom=fanyi.web
+        request_data = LOAD_TTS_DATA(from_lang, text)
+        #_TTS_PARAMS.update(request_data)
+        _TTS_PARAMS = dict(_TTS_PARAMS,**request_data)
+        
+        #_TTS_PARAMS = {'word':'hello','keyfrom':'fanyi.web'}
         def callback():
             # GET request
             response = requests.get(
-                _GOOGLE_TTS_URL,
-                params=params,
+                _TTS_URL,    
+                params=_TTS_PARAMS, 
             )
             return response
 
         response = self._request_with_reconnect(callback)
-        return response.content
+        
+        # save audio/mpeg to .mp3
+        with open("text2speech.mp3", "wb+") as code:
+            code.write(response.content)
+        mpg123exeDir = os.getcwd() + os.sep + "dig" +  os.sep + "mpg123.exe"
+        call([mpg123exeDir,"text2speech.mp3"])
+        os.remove("text2speech.mp3")
 
-    def _request(self, tgt_lang, src_texts):
+
+    def _request(self, from_lang, text):
         """
         Description:
-            Similar to _TranslateMinix._request. src_texts should be a list
-            contains texts to generate audio. Concurrent request is applied.
-        Return Value:
-            MPEG Binary data.
+            Similar to _TranslateMinix._request. Text should be in from_lang.
         """
 
-        executor = ThreadPoolExecutor(max_workers=len(src_texts))
-        threads = []
-        for index, src_text in enumerate(src_texts):
-            future = executor.submit(
-                self._basic_request,
-                tgt_lang,
-                src_text,
-                len(src_texts),
-                index,
-            )
-            threads.append(future)
-
-        # check whether all threads finished or not.
-        self._check_threads(threads)
-
-        # concatenate binary data.
-        get_result = lambda x: x.result()
-        return b''.join(map(get_result, threads))
-
+        self._basic_request(from_lang, text)
 
 class TTSService(_TTSRequestMinix, _SplitTextMinix):
 
-    def __init__(self):
-        pass
 
-    def get_mpeg_binary(self, tgt_lang, src_text):
+    def speak_details(self, from_lang, text):
         """
         Description:
-            Accept both UTF-8 or decoded unicode strings. Get MPEG binary data
-            of given source text, as the result of Google
-            TTS service.
-        Return Value:
-            MPEG Binary data.
+            request the Text To Speech api
         """
-        src_texts = self._split_text(src_text, _MAX_TTS_LENGTH)
-        print(src_text)
-        return self._request(tgt_lang, src_texts)
+        self._request(from_lang, text)
+
+
+def Global_settings():
+    
+    global _TRANS_URL,_TRANS_PARAMS,_TTS_URL,_TTS_PARAMS
+
+    with open(TOOL_FILENAME, 'rb+') as f:
+        content = f.read()
+    content = eval(content)
+    tool = content["TOOL"]
+
+    if tool == "google":                
+        _TRANS_URL = GOOGLE_TRANS_URL             
+        _TTS_URL = GOOGLE_TTS_URL
+        _TRANS_PARAMS = GOOGLE_TRANS_PARAMS
+        _TTS_PARAMS = GOOGLE_TTS_PARAMS
+    elif tool == "youdao":
+        _TRANS_URL = YOUDAO_TRANS_URL             
+        _TTS_URL = YOUDAO_TTS_URL
+        _TRANS_PARAMS = YOUDAO_TRANS_PARAMS
+        _TTS_PARAMS = YOUDAO_TTS_PARAMS
+    return tool
 
 if __name__ == '__main__':
         
-    #print translator.trans_details('en', 'zh-CN', 'this is')
+    """
+    Description
+        only development test 
+        users could just ignore
+    """
     import platform
     audio_player = 'afplay' if platform.system() == 'Darwin' else 'mpg123'
     

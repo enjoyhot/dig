@@ -12,10 +12,10 @@ setup(
     version=version,
     author='Gogary',
     author_email='gugugujiawei@gmail.com',
-
-    url='https://pypi.python.org/pypi/dig',
-    license='MIT',
-    description='command-line front end of google translation serve.',
+ 
+    url='https://github.com/enjoyhot/dig',
+    license='BSD',
+    description='Command-line tool of [ google, youdao ] translation serve.',
     long_description=open('README.rst').read(),
 
     
@@ -29,13 +29,17 @@ setup(
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
+        'Intended Audience :: End Users/Desktop ',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Operating System :: OS Independent',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
+
 print("======================")
 print("######################")
 print("# dig version: " + version + " #")

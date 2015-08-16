@@ -7,14 +7,15 @@ from __future__ import print_function
 from datetime import datetime
 import xml.etree.ElementTree as ET
 
-from google_translate_api import TranslateService
-
 from dig.share import ensure_decode
 from dig.data_io import RecordIO
 
 
-
-
+"""
+two usage
+    1.data.io record variable
+    2.xml element name
+"""
 _RECORD = 'record'
 
 _TAGLIST = ['time','from_lang','to_lang','data','result']
@@ -60,15 +61,17 @@ class Record:
             else.
         Return:
             None.
-        """        
-        
-        has_dict = TranslateService.has_pos_terms_pairs
-        extract_pairs = TranslateService.get_pos_terms_pairs_from_json
-        extract_sentences = TranslateService.get_senteces_from_json
+        """                
 
         # read root from xml record file
         
         root = self._load_xml(_RECORD)
+        
+        from settings import MAX_RECORD_NUM
+        while len(root) >= MAX_RECORD_NUM:        
+            topRecord = root.find(_RECORD)
+            root.remove(topRecord)
+            
         
         #extend(subelements)
         # "The element name, attribute names, and attribute values can be
@@ -85,6 +88,7 @@ class Record:
             temp = ET.Element(tag)  
             temp.text = textList[index]
             record.append(temp)
+        
         
         self._write_xml(_RECORD)
         

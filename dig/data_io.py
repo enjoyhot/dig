@@ -60,10 +60,10 @@ class RecordIO(object):
             _RECORD_FILENAME,
         )
         if os.path.exists(self._record_path) == False:
-            xml_file = self.CreateXml()
+            xml_file = self._create_xml()
             xml_file.write(self._record_path)
             
-    def CreateXml(self):
+    def _create_xml(self):
         xml_file = ET.ElementTree()
         purOrder = ET.Element(_ROOT)
         xml_file._setroot(purOrder)
@@ -84,7 +84,7 @@ class RecordIO(object):
         openfile = gzip.open if gzip_enable else open
         with openfile(path, 'rb+') as f:
             content = f.read()
-        import xml.etree.ElementTree as ET 
+        #import xml.etree.ElementTree as ET 
         self.tree = ET.parse(path)     
         root = self.tree.getroot()
         return root
@@ -92,17 +92,14 @@ class RecordIO(object):
     def _write_file(self, path, gzip_enable=False):
         """
         Parameters:
-            content: bytes of content to be written to file.
+            path: record.xml path.
             others: equivalent to _read_file.
+        Function:
+            Commit and update xml tree.
         Return:
             None.
         """
         self.tree.write(path)
-        '''
-        openfile = gzip.open if gzip_enable else open
-        with openfile(path, 'wb+') as f:
-            f.write(content)
-        '''
         
     #############
     # Record IO #
@@ -114,6 +111,7 @@ class RecordIO(object):
     def _write_record(self, content):
         self._write_file(self._record_path)
 
+    # == record.py._RECORD
     record = property(_read_record, _write_record)
 
 

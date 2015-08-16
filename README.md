@@ -54,20 +54,7 @@ $ python setup.py install
 
 # Important points
 
-<<<<<<< HEAD
 1. If you use "pip install dig", because [dig/mpg123.exe](https://github.com/enjoyhot/dig/blob/master/dig/mpg123.exe) doesn't exist,so add it in case of error when using text to speech.
 2. Now only support google and youdao translation, make sure your computer can connect to google.com or youdao.com.
-4. Text to speech function is effective only in win7/xp platform. 
-
-=======
-1. Now only support google translation.
-2. Make sure your computer can connect to google.com.
 3. Text to speech function is effective only in win7/xp platform. 
 
-# Uncompleted problems
-
-* Mix with other translation tools
-* Decoupling, adapt change 
-* Support pip download
-* Bugs undiscovered
->>>>>>> origin/master

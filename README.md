@@ -1,5 +1,6 @@
 # Dig 
-	[![alt PyPI Version](https://img.shields.io/pypi/v/Scrapy.svg "pip version")](https://pypi.python.org/pypi/dig)
+
+[![alt PyPI Version](https://img.shields.io/pypi/v/Scrapy.svg "pip version")](https://pypi.python.org/pypi/dig)
 
 
 ## Overview

@@ -7,9 +7,11 @@ For more information about these settings you can read the settings
 documentation in https://github.com/enjoyhot/dig
 
 """
+import os
+from os.path import join,dirname
 
-VERSION = "0.1.2"
-TOOL_FILENAME = "tool"
+VERSION = "0.1.7"
+TOOL_FILENAME = join(dirname(__file__)) + os.sep + "../tool"
 MAX_RECORD_NUM = 20
 
 OPTIONAL_TOOLS = ["google","youdao"]

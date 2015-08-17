@@ -9,6 +9,7 @@ import unicodedata
 import requests
 import re
 import os
+from os.path import dirname,join
 from subprocess import call
 import json
 # third-part dependencies
@@ -25,7 +26,7 @@ _RECONNECT_TIMES = 5
 _TIMEOUT = 30
 
 global _TRANS_URL
-_MAX_TRANS_LENGTH = 20
+_MAX_TRANS_LENGTH = 100
 
 global  _TTS_URL
 _MAX_TTS_LENGTH = 99
@@ -195,7 +196,6 @@ class _TranslateMinix(_BaseRequestMinix):
             return STR_RESULT(text[0],True)
 
         merged_text = ""
-    
         
         for textItem in text:
             merged_text = merged_text + STR_RESULT(textItem,False)
@@ -292,12 +292,14 @@ class _TTSRequestMinix(_BaseRequestMinix):
 
         response = self._request_with_reconnect(callback)
         
-        # save audio/mpeg to .mp3
-        with open("text2speech.mp3", "wb+") as code:
+        # save audio/mpeg to .mp3        
+
+        mp3_file = join(dirname(__file__)) + os.sep + "../text2speech.mp3"
+        with open(mp3_file, "wb+") as code:
             code.write(response.content)
-        mpg123exeDir = os.getcwd() + os.sep + "dig" +  os.sep + "mpg123.exe"
-        call([mpg123exeDir,"text2speech.mp3"])
-        os.remove("text2speech.mp3")
+        mpg123exeDir = join(dirname(__file__)) + os.sep + "mpg123.exe"
+        call([mpg123exeDir,mp3_file])
+        os.remove(mp3_file)
 
 
     def _request(self, from_lang, text):

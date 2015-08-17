@@ -69,7 +69,8 @@ def main():
         tool_save = "{'TOOL':'" + CURRENT_TOOL + "'}"
         with open(TOOL_FILENAME, "wb+") as f:
             f.write(tool_save)    
-    with open("dig/VERSION", "rb+") as f:
+    #with open("dig/VERSION", "rb+") as f:
+    with open(join(dirname(__file__), 'VERSION'), 'rb+') as f:
         VERSION = f.read()  
     
     arguments = docopt(
@@ -89,6 +90,7 @@ def main():
         # translate data, get the result, show the result
         translator = Translator(from_lang, to_lang, data)
         result = translator.translate()
+         
         translator.display_result(from_lang,to_lang,result)
         
         # add record
@@ -119,7 +121,7 @@ def main():
         content = eval(content)
         tool = content["TOOL"]
         print("")
-        print("----- Your current traslation tool: " + str(tool) + " -----")
+        print("----- Your current translation tool: " + str(tool) + " -----")
         if arguments['<tool>'] not in OPTIONAL_TOOLS:  
             print("") 
             wrong_input = arguments['<tool>']        
@@ -141,4 +143,5 @@ def main():
         raise Exception('No Implemented Yet.')
     
     
-    
+
+

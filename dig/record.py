@@ -96,11 +96,12 @@ class Record:
 
         if from_index == len(root):
             from_index = 0
+            
         for index,record in enumerate(root):
             if index >= from_index:
                 print('===========================================')
                 for child in record:           
-                    print(child.tag + ":" + child.text)  
+                    print(child.tag + ":" + child.text)         
             
         print('===========================================') 
         

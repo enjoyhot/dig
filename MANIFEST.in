@@ -1,0 +1,9 @@
+include README.rst
+include LICENSE
+include MANIFEST.in
+include config
+include tool
+include record.xml
+include dig/VERSION
+include dig/mpg123.exe
+

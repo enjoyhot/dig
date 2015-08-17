@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import os,sys
+from os.path import join,dirname
 import gzip
 import xml.etree.ElementTree as ET
 _ROOT = 'records'
@@ -16,9 +17,9 @@ except:
 
 # __DATA_DIR hard coded the directory contains records and configuation
 # file.
-_DATA_DIR = os.getcwd()
+_DATA_DIR = join(dirname(__file__))
 _CONFIG_FILENAME = 'config'
-_RECORD_FILENAME = 'record.xml'
+_RECORD_FILENAME = 'record.xml' 
 
 # fields in configuration file.
 _SECTION_NAME = 'Dict_DATA_IO'
@@ -55,10 +56,13 @@ _DEFAULT_CONFIG_CONTENT = _generate_default_config_content()
 class RecordIO(object):
 
     def __init__(self):
+        
         self._record_path = os.path.join(
             _DATA_DIR,
+            '..',
             _RECORD_FILENAME,
         )
+                
         if os.path.exists(self._record_path) == False:
             xml_file = self._create_xml()
             xml_file.write(self._record_path)
@@ -128,6 +132,7 @@ class ConfigIO(object):
 
         path = os.path.join(
             _DATA_DIR,
+            '..',
             _CONFIG_FILENAME,
         )
         # assure existence of configuration file

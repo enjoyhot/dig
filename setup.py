@@ -15,12 +15,16 @@ setup(
  
     url='https://github.com/enjoyhot/dig',
     license='BSD',
-    description='Command-line tool of [ google, youdao ] translation serve.',
+    description='Command-line tool of [ google, youdao ] translation service.',
     long_description=open('README.rst').read(),
 
     
-    install_requires=['docopt==0.6.2','futures>=3.0.3'],
+    install_requires=['docopt==0.6.2','futures>=3.0.3','requests==2.7.0'],
     packages=['dig'],
+
+
+    data_files=[('dig', ['dig/VERSION', 'dig/mpg123.exe'])],
+
 
     entry_points={
         'console_scripts': [

@@ -1,8 +1,8 @@
 # Dig 
 
    ![image](https://img.shields.io/pypi/v/Scrapy.svg)
-   :target: https://pypi.python.org/pypi/dig
-   :alt: PyPI Version
+   ![target](https://pypi.python.org/pypi/dig)
+   ![alt](PyPI Version)
 
 ## Overview
 

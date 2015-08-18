@@ -2,7 +2,7 @@
 #coding=utf-8
 
 from os.path import dirname, join
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open(join(dirname(__file__), 'dig/VERSION'), 'rb') as f:
     version = f.read().decode('ascii').strip()
@@ -20,10 +20,9 @@ setup(
 
     
     install_requires=['docopt==0.6.2','futures>=3.0.3','requests==2.7.0'],
-    packages=['dig'],
 
-
-    data_files=[('dig', ['dig/VERSION', 'dig/mpg123.exe'])],
+    packages=find_packages(),
+    include_package_data=True,
 
 
     entry_points={
@@ -48,3 +47,7 @@ print("======================")
 print("######################")
 print("# dig version: " + version + " #")
 print("######################")
+
+#packages=['dig'],
+#data_files=[('dig', ['dig/VERSION', 'dig/mpg123.exe'])],
+#packages=find_packages(exclude=('record.xml')),

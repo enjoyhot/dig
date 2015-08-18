@@ -294,7 +294,7 @@ class _TTSRequestMinix(_BaseRequestMinix):
         
         # save audio/mpeg to .mp3        
 
-        mp3_file = join(dirname(__file__)) + os.sep + "../text2speech.mp3"
+        mp3_file = join(dirname(__file__)) + os.sep + "text2speech.mp3"
         with open(mp3_file, "wb+") as code:
             code.write(response.content)
         mpg123exeDir = join(dirname(__file__)) + os.sep + "mpg123.exe"

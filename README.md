@@ -70,14 +70,14 @@ Examples:
 * English : en
 * Chinese : zh_CN
 * Japanese : ja
-...
+* ...
 
 ### Youdao
 
 * English : EN
 * Chinese : ZH_CN
 * Japanese : JA
-...
+* ...
 
 ## Requirements
 
@@ -108,13 +108,14 @@ $ python setup.py install
 ```
 ## Releases
 
+**v0.1.9**
+
 You can download the latest stable and development releases from: https://github.com/enjoyhot/dig/releases
 
 ## Important points
 
-1. If you use "pip install dig", because [dig/mpg123.exe](https://github.com/enjoyhot/dig/blob/master/dig/mpg123.exe) doesn't exist,so add it in case of error when using text to speech.
-2. Now only support google and youdao translation, make sure your computer can connect to google.com or youdao.com.
-3. Text to speech function is effective only in win7/xp platform. 
+1. Now only support google and youdao translation, make sure your computer can connect to google.com or youdao.com.
+2. Text to speech function is effective only in win7/xp platform. 
 
 ## Problems
-pip for packages requests!!!
+pip for packages requests now always occurs to error, so [download it](https://pypi.python.org/pypi/requests) and 'python setup.py install' in replace.

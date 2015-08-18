@@ -59,7 +59,6 @@ class RecordIO(object):
         
         self._record_path = os.path.join(
             _DATA_DIR,
-            '..',
             _RECORD_FILENAME,
         )
                 
@@ -132,7 +131,6 @@ class ConfigIO(object):
 
         path = os.path.join(
             _DATA_DIR,
-            '..',
             _CONFIG_FILENAME,
         )
         # assure existence of configuration file

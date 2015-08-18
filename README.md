@@ -99,7 +99,8 @@ Examples:
 $ pip install dig
 ```
 See https://pypi.python.org/pypi/dig
-** Note:in the way "pkg_resources.distributionnotfound:requests" maybe happen, just remove site-packages/requests, download [requests](https://pypi.python.org/pypi/requests#downloads) and install.**
+
+** Note:in this way "pkg_resources.distributionnotfound:requests" maybe happen, just remove site-packages/requests, download [requests](https://pypi.python.org/pypi/requests#downloads) and install.**
 
 ### Another way:
 download [the whole package](https://github.com/enjoyhot/dig/archive/master.zip) and input as follows:
@@ -119,3 +120,6 @@ You can download the latest stable and development releases from: https://github
 
 ## Problems
 pip for packages requests now always occurs to error, so [download it](https://pypi.python.org/pypi/requests) and 'python setup.py install' in replace.
+
+## Learn how to make your package support pip
+see https://github.com/enjoyhot/dig/wiki

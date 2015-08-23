@@ -44,9 +44,9 @@ setup(
 )
 
 print("======================")
-print("######################")
+print("#######################")
 print("# dig version: " + version + " #")
-print("######################")
+print("#######################")
 
 #packages=['dig'],
 #data_files=[('dig', ['dig/VERSION', 'dig/mpg123.exe'])],

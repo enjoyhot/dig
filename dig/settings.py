@@ -10,12 +10,12 @@ documentation in https://github.com/enjoyhot/dig
 import os
 from os.path import join,dirname
 
-VERSION = "0.1.9"
+VERSION = "0.1.10"
 TOOL_FILENAME = join(dirname(__file__)) + os.sep + "tool"
 MAX_RECORD_NUM = 20
 
 OPTIONAL_TOOLS = ["google","youdao"]
-CURRENT_TOOL = "google"
+CURRENT_TOOL = "youdao"
 
 
 """

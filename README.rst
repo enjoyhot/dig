@@ -35,17 +35,43 @@ The quick way::
 
     pip install dig
 
-Another way:
+Another way::
 
     python setup.py install
 
-(Make sure your hardware platform install dependent package)
+(Make sure your hardware platform install dependent packages)
 
-Releases
+Releases History
+================
+
+You can download the latest stable and development releases from: https://github.com/enjoyhot/dig/releases
+
+***************
+0.1.10
+***************
+
+** Bugfixes **
+
+* TTS fits for Windows7 or Linux platform.
+
+***************
+0.1.9
+***************
+
+** Bugfixes **
+
+* Update the dig for global Environment in windows dos or linux shell.
+
+Important points
+================
+
+1. You should install mpg123 if your platform is Linux.
+2. Now only support google and youdao translation, make sure your computer can connect to google.com or youdao.com. 
+
+Problems
 ========
 
-You can download the latest stable and development releases from:
-https://github.com/enjoyhot/dig/releases
+Only for Win7: There was wrong when piping for requests packages, so download it individually.
 
 Community (github, email)
 =========================================

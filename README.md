@@ -100,26 +100,39 @@ $ pip install dig
 ```
 See https://pypi.python.org/pypi/dig
 
-** Note:in this way "pkg_resources.distributionnotfound:requests" maybe happen, just remove site-packages/requests, download [requests](https://pypi.python.org/pypi/requests#downloads) and install.**
+** Note:**
+
+In the way "pkg_resources.distributionnotfound:requests" maybe happen, just remove site-packages/requests, download [requests](https://pypi.python.org/pypi/requests#downloads) and install.
 
 ### Another way:
 download [the whole package](https://github.com/enjoyhot/dig/archive/master.zip) and input as follows:
 ```python
 $ python setup.py install
 ```
-## Releases
-
-**v0.1.9**
+## Releases History
 
 You can download the latest stable and development releases from: https://github.com/enjoyhot/dig/releases
 
+** v0.1.10 **
+
+Bugfixes
+* TTS fits for Windows7 or Linux platform.
+
+** v0.1.9 **
+
+Bugfixes
+* Update the dig for global Environment in windows dos or linux shell.
+
 ## Important points
 
-1. Now only support google and youdao translation, make sure your computer can connect to google.com or youdao.com.
-2. Text to speech function is effective only in win7/xp platform. 
+1. You should install mpg123 if your platform is Linux.
+2. Now only support google and youdao translation, make sure your computer can connect to google.com or youdao.com. 
+
 
 ## Problems
-pip for packages requests now always occurs to error, so [download it](https://pypi.python.org/pypi/requests) and 'python setup.py install' in replace.
+
+Only for Win7: There was wrong when piping for [requests](https://pypi.python.org/pypi/requests#downloads) packages, so download it individually.
+
 
 ## Learn how to make your package support pip
 see https://github.com/enjoyhot/dig/wiki

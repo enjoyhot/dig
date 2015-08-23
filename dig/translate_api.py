@@ -22,8 +22,8 @@ reload(sys)
 sys.setdefaultencoding('gb18030')
 
 
-_RECONNECT_TIMES = 5
-_TIMEOUT = 30
+_RECONNECT_TIMES = 1
+#_TIMEOUT = 10
 
 global _TRANS_URL
 _MAX_TRANS_LENGTH = 100
@@ -44,27 +44,37 @@ class _BaseRequestMinix(object):
 
     def _request_with_reconnect(self, callback):        
         reconnect_times = _RECONNECT_TIMES        
-        while True:            
+        while reconnect_times>0:            
             try:
                 # request using callback function
-                response = callback()                
+                response = callback()               
                 break
             except Exception as e:
-                if reconnect_times == 0:            
-                    # has already tried _RECONNECT_TIMES times, request failed.
-                    # if so, just let it crash.                    
-                    raise e
-                else:                    
-                    reconnect_times -= 1
+                print ("-----Timeout occurred, try again-----")
+                response = None                                  
+                reconnect_times -= 1
+                        
         return response
-
+    
+    """
     def _check_threads(self, threads):
-        for future in threads:            
-            if future.exception(_TIMEOUT) is None:                
-                continue
-            else:
-                # let it crash.
-                raise future.exception()
+        
+        con_success = True
+        for future in threads:    
+            try:       
+                # reconnect in the time range of _TIMEOUT 
+                # if not succeed
+                if future.exception(_TIMEOUT) is None:                
+                    continue
+                else:
+                    # let it crash.
+                    raise future.exception()
+            except Exception as e:
+                print("threads timeout occurred")
+                con_success = False
+                
+        return con_success
+    """
 
 class _SplitTextMinix(object):    
     
@@ -169,15 +179,24 @@ class _TranslateMinix(_BaseRequestMinix):
         def callback():
             # POST request
             headers = {'content-type': 'application/json'}
-            response = requests.post(
-                _TRANS_URL,
-                data=request_data,
-                params=_TRANS_PARAMS,                
-            ) 
-                   
+            try:
+                response = requests.post(
+                    _TRANS_URL,
+                    data=request_data,
+                    params=_TRANS_PARAMS,  
+                    timeout=2,                     
+                )
+            except Exception as e:                                  
+                raise e      
+                                            
             return response
         
         response = self._request_with_reconnect(callback) 
+        
+        # If translate occurs error, just returns None.
+        if response == None:
+            return None
+        
         return response.text    
     
 
@@ -215,7 +234,7 @@ class _TranslateMinix(_BaseRequestMinix):
             of threads concurrency.
         Return Value:
             String object.
-        """                 
+        """                
         executor = ThreadPoolExecutor(max_workers=len(src_texts))
         threads = []        
         for src_text in src_texts:                   
@@ -228,7 +247,12 @@ class _TranslateMinix(_BaseRequestMinix):
             threads.append(future)
         
         # check whether all threads finished or not.
-        self._check_threads(threads)      
+        # con_success = self._check_threads(threads)      
+        #if not con_success:
+        #    return "Please check your site"
+        if threads[0].result() == None:
+            return "Error in network!"
+        
         merged_text = self._merge_text(
             [future.result() for future in threads],
         )   
@@ -297,8 +321,17 @@ class _TTSRequestMinix(_BaseRequestMinix):
         mp3_file = join(dirname(__file__)) + os.sep + "text2speech.mp3"
         with open(mp3_file, "wb+") as code:
             code.write(response.content)
-        mpg123exeDir = join(dirname(__file__)) + os.sep + "mpg123.exe"
-        call([mpg123exeDir,mp3_file])
+        
+        # judge the platform
+        import platform        
+        if 'Linux' in platform.system():
+            try:            
+                call(["mpg123",mp3_file])
+            except Exception as e:
+                print("-----TTS warning:please install mpg123 for TTS.-----")
+        else:
+            mpg123exeDir = join(dirname(__file__)) + os.sep + "mpg123.exe"
+            call([mpg123exeDir,mp3_file])
         os.remove(mp3_file)
 
 

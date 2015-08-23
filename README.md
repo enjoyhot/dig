@@ -100,7 +100,7 @@ $ pip install dig
 ```
 See https://pypi.python.org/pypi/dig
 
-** Note:**
+**Note:**
 
 In the way "pkg_resources.distributionnotfound:requests" maybe happen, just remove site-packages/requests, download [requests](https://pypi.python.org/pypi/requests#downloads) and install.
 
@@ -113,12 +113,12 @@ $ python setup.py install
 
 You can download the latest stable and development releases from: https://github.com/enjoyhot/dig/releases
 
-** v0.1.10 **
+**v0.1.10**
 
 Bugfixes
 * TTS fits for Windows7 or Linux platform.
 
-** v0.1.9 **
+**v0.1.9**
 
 Bugfixes
 * Update the dig for global Environment in windows dos or linux shell.

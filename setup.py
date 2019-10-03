@@ -19,7 +19,7 @@ setup(
     long_description=open('README.rst').read(),
 
     
-    install_requires=['docopt==0.6.2','futures>=3.0.3','requests==2.7.0'],
+    install_requires=['docopt==0.6.2','futures>=3.0.3','requests==2.20.0'],
 
     packages=find_packages(),
     include_package_data=True,
